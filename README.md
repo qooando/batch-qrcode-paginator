@@ -61,6 +61,7 @@ Output is saved locally and eventually uploaded to a gdrive folder (See below).
 It is a single pdf file with ALL qrcodes with id, content, where and comments fields.
 
 e.g.
+
 ![example_output.png](example_output.png)
 
 # gdrive integration
