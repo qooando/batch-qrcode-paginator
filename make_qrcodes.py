@@ -24,7 +24,6 @@ from pandas_ods_reader import read_ods
 import ezodf
 from logging import getLogger, basicConfig
 import yaml
-import upload_build
 import gspread
 
 basicConfig(level=logging.DEBUG)
