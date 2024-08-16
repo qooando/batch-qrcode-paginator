@@ -1,0 +1,63 @@
+@media print {
+    .felicita, .pensiero, .relazione, .gruppo, .evidenziato, .handout {
+        break-inside: avoid;
+    }
+
+    .presentazione, .istruzioni, .storie, .pensieri, .relazioni, .infos, .handouts, .atto {
+        /*break-after: page;*/
+    }
+
+    .presentazione, .atto {
+        break-after: page;
+    }
+
+    @page :right {
+        margin-left: 1in;
+    }
+
+    @page :left {
+        margin-right: 1in;
+    }
+
+    /*.break-to-left {*/
+    /*    break-before: page;*/
+    /*}*/
+    /*.break-to-right {*/
+    /*    break-after: right;*/
+    /*}*/
+
+
+    .interruzione_atto {
+        display: block;
+        margin-top: 25vh;
+        margin-left: 10vw;
+    }
+
+    .interruzione_atto h1 {
+        border-width: 0;
+        font-size: 500%;
+        break-before: page;
+    }
+
+    .interruzione_atto .spiegazione {
+        max-width: 50vw;
+        padding: 1em;
+        border: 2px dashed red;
+        break-after: page;
+    }
+
+.felicita,
+.evidenziato, .pensiero, .relazione, .handout, .gruppo {
+    padding: 0.5em;
+}
+.pensiero .narrato {
+    margin-bottom: 0;
+}
+h3, h2 {
+    margin:0;
+}
+.line .narrato {
+    padding-top:0;
+}
+
+}
