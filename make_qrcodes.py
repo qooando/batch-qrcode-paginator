@@ -11,10 +11,13 @@ import subprocess
 
 import PyPDF2
 import click
+import segno
 import semantic_version
 from box import Box
 from ezodf.sheets import Sheets
 from gspread.utils import ExportFormat
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 from relatorio.templates.opendocument import Template
 import yaml
 from pandas_ods_reader import read_ods
@@ -92,6 +95,10 @@ class Maker:
                         break
                     if line["id"] is None:
                         line["id"] = next(INCREMENTAL_INDEX)
+                    if line["count"] is None:
+                        line["count"] = 1
+                    if line["size"] is None:
+                        line["size"] = 5
                     context[line["id"]] = line
 
         return context
@@ -104,6 +111,10 @@ class Maker:
 
         for id, line in qrcodes.items():
             logger.debug(f"Make qrcode: {id}")
+            image_path = f'./build/{id}.png'
+            qrcode = segno.make_qr(line["content"])
+            qrcode.save(image_path, scale=line["size"])
+            qrcodes[id]["img"] = f"./{id}.png"
 
         logger.info(f"Create output at '{self.config.output.local.path}'")
         pathlib.Path(self.config.output.local.path).parent.mkdir(exist_ok=True)
@@ -112,22 +123,54 @@ class Maker:
 
         from genshi.template import MarkupTemplate
         template = MarkupTemplate(open(self.config.template.html.path, encoding="utf-8"))
-        generated = (template.generate(values={"qrcodes": qrcodes.values()}).render("xhtml", encoding="utf-8"))
+        generated = (template.generate(values={"qrcodes": sorted(qrcodes.values(), key=lambda x: x["id"])}).render("xhtml", encoding="utf-8"))
 
         html_path = self.config.output.local.path.replace(".pdf", ".html")
         logger.info(f"Write output to '{html_path}'")
         with open(html_path, "wb") as f:
             f.write(generated)
 
-            logger.info(f"Convert '{html_path}' to pdf")
-            pdf_path = self.config.output.local.path
-            os.system(
-                f"{self.config.output.local.browser} --headless --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf='{pdf_path}' '{html_path}'"
-            )
+        logger.info(f"Convert '{html_path}' to pdf")
+        pdf_path = self.config.output.local.path
+        os.system(
+            f"{self.config.output.local.browser} --headless --run-all-compositor-stages-before-draw --print-to-pdf-no-header --print-to-pdf='{pdf_path}' '{html_path}'"
+        )
 
         if self.config.output.gdrive.upload:
-            raise NotImplementedError("UPLOAD")
+            logger.info("Upload to Google Drive")
+            self._upload(pdf_path)
 
+
+    def _upload(self, file):
+        gauth = GoogleAuth()
+        gauth.LoadCredentialsFile(self.config.input.gdrive.access_token)
+        if gauth.credentials is None:
+            gauth.LocalWebserverAuth()
+        elif gauth.access_token_expired:
+            gauth.Refresh()
+        else:
+            gauth.Authorize()
+        gauth.SaveCredentialsFile(self.config.input.gdrive.access_token)
+
+        drive = GoogleDrive(gauth)
+
+        file_list = drive.ListFile({'q': f"'{self.config.output.gdrive.folder}' in parents and trashed=false"}).GetList()
+        file_list = {f['title']: f for f in file_list}
+        if file in file_list.keys():
+            logger.info(f"Upload and replace {file}")
+            gfile = drive.CreateFile({'id': file_list[file]['id']})
+            del file_list[file]
+        else:
+            logger.info(f"Upload {file}")
+            gfile = drive.CreateFile({'parents': [{'id': self.config.output.gdrive.folder}]})
+        gfile.SetContentFile(file)
+
+        gfile.Upload()
+
+        permission = gfile.InsertPermission({
+            'type': 'anyone',
+            'value': 'anyone',
+            'role': 'reader'})
 
 @click.command()
 @click.option('-c', '--config', default='./config.yaml', help='make config')

@@ -3,22 +3,26 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
 <head>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="./qrcodes.css"/>
-    <link rel="stylesheet" type="text/css" href="./print.css"/>
+    <link rel="stylesheet" type="text/css" href="../assets/qrcodes.css"/>
+    <link rel="stylesheet" type="text/css" href="../assets/print.css"/>
 </head>
 <body>
 <!--<xi:include href="./assets/template/parte_base.html" parse="template"></xi:include>-->
-<div py:for="line in values.qrcodes">
-    <table>
-        <tr>
-            <td></td>
-            <td>${line.content}</td>
-        </tr>
-        <tr>
-            <td>${line.id}</td>
-            <td>${line.id} <strong>${line.where}</strong> ${line.comments}</td>
-        </tr>
-    </table>
-</div>
+<table>
+    <div py:for="line in values.qrcodes">
+        <div py:for="i in range(int(line.count))">
+            <tr>
+                <td class="image">
+                    <img class="qrcode" src="${line.img}" alt="" />
+                    <p class="image_id">${line.id}</p>
+                </td>
+                <td class="description">
+                    <p class="content">${line.content}</p>
+                    <p class="guide">${line.id} <strong>${line.where}</strong> ${line.comments}</p>
+                </td>
+            </tr>
+        </div>
+    </div>
+</table>
 </body>
 </html>
