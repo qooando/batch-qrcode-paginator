@@ -1,0 +1,21 @@
+input:
+  gdrive:
+    download: true
+    url: ""
+    credentials: "./credentials.json"
+    access_token: "./user_creds.txt"
+  local:
+    path: "assets/input.ods"
+template:
+  html:
+    path: "assets/template/qrcodes.html"
+    browser: "chromium-browser"
+  images:
+    path: "assets/images"
+output:
+  local:
+    path: "build"
+  gdrive:
+    upload: true
+    folder: ""
+
