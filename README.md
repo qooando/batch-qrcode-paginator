@@ -41,14 +41,27 @@ configuration file is `./config.yaml`
 
 Input should be a table with the following named columns
 
-| content     | size  | count | id  | where        | comments |
-|-------------|-------|-------|-----|--------------|----------|
-| Lorem Ipsum | 300   | 2     | MB1 | Mistery Box  |          |
+| content     | size | count | id | where  | comments |
+|-------------|------|-------|----|--------|----------|
+| Lorem Ipsum | 5    | 2     | 1  | School |          |
+
+where:
+- `content` is the actual encoded content,
+- `size` is the scale of the qrcode, if not specified default is `5`,
+- `count` is the number of repetition of the same qrcode, if not specified default is `1`,
+- `id` is a unique identifier, useful to track the qrcode after it was removed from the page, if not specified a default incremental id is used,
+- `where` is where the qrcode must be placed,
+- `comments` are additional comments to print on the right of id and position.
+
+Do not leave empty lines, the script stops at the first empty content.
 
 # output
 
 Output is saved locally and eventually uploaded to a gdrive folder (See below).
 It is a single pdf file with ALL qrcodes with id, content, where and comments fields.
+
+e.g.
+![example_output.png](example_output.png)
 
 # gdrive integration
 
